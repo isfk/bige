@@ -27,6 +27,7 @@ class _DownloadState extends State<Download> {
   var pauseDownloading = false;
   var downloadingI = 0;
   var downloadingMsg = "";
+  var cancelToken = CancelToken();
 
   List<Music> musics = [];
   List<int> chunkCountAll = [0, 0, 0, 0, 0];
@@ -92,17 +93,6 @@ class _DownloadState extends State<Download> {
   void startDownload({int i = 0, bool restart = false}) async {
     checkPermission().then((value) {
       if (value) {
-        if (!restart) {
-          if (pauseDownloading) {
-            setState(() {
-              downloadingMsg = "暂停下载";
-              downloading = false;
-            });
-            showToast(context, "暂停下载");
-            return;
-          }
-        }
-
         if (i >= musics.length) {
           showToast(context, "所有歌曲下载完成", duration: 10);
           setState(() {
@@ -115,6 +105,7 @@ class _DownloadState extends State<Download> {
         }
 
         setState(() {
+          cancelToken = CancelToken();
           downloading = true;
           pauseDownloading = false;
           downloadingI = i;
@@ -220,9 +211,12 @@ class _DownloadState extends State<Download> {
   }
 
   void pauseDownload() async {
-    showToast(context, "当前歌曲下载完停止", duration: 10);
+    cancelToken.cancel("您取消了下载");
+    // showToast(context, "当前歌曲下载完停止", duration: 10);
     setState(() {
       pauseDownloading = true;
+      downloading = false;
+      downloadingMsg = "逼歌";
     });
   }
 
@@ -238,6 +232,7 @@ class _DownloadState extends State<Download> {
           "range": "bytes=$start-$end",
         },
       ),
+      cancelToken: cancelToken,
       onReceiveProgress: (count, total) {
         if (total == -1) {
           showToast(context, "${music.name} 下载异常");
