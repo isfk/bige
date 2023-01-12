@@ -316,8 +316,8 @@ class _DownloadState extends State<Download> {
                     ),
                   ),
                   backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                  content:
-                      Text("下载路径: \n\n $destBasePath \n\n 使用主流音乐播放器扫描本地音乐即可"),
+                  content: Text(
+                      "下载路径: \n\n $destBasePath \n\n 使用主流音乐播放器扫描本地音乐即可 \n\n 如出现下载卡住情况可停止再继续下载"),
                   contentTextStyle: const TextStyle(
                     color: Color.fromARGB(160, 255, 255, 255),
                   ),
@@ -341,9 +341,9 @@ class _DownloadState extends State<Download> {
                   ),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context, '取消'),
+                      onPressed: () => Navigator.pop(context, '关闭窗口'),
                       child: const Text(
-                        "取消",
+                        "关闭窗口",
                         style: TextStyle(
                           color: Color.fromARGB(160, 255, 255, 255),
                         ),
