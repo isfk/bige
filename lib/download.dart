@@ -309,12 +309,46 @@ class _DownloadState extends State<Download> {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text("下载全部?"),
-                  content: Text("下载路径: \n $destBasePath"),
+                  title: const Text(
+                    "温馨提示: ",
+                    style: TextStyle(
+                      color: Color.fromARGB(160, 255, 255, 255),
+                    ),
+                  ),
+                  backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                  content:
+                      Text("下载路径: \n\n $destBasePath \n\n 使用主流音乐播放器扫描本地音乐即可"),
+                  contentTextStyle: const TextStyle(
+                    color: Color.fromARGB(160, 255, 255, 255),
+                  ),
+                  shape: const Border(
+                    top: BorderSide(
+                      width: 6.0,
+                      color: Color.fromARGB(160, 255, 255, 255),
+                    ),
+                    left: BorderSide(
+                      width: 6.0,
+                      color: Color.fromARGB(80, 255, 255, 255),
+                    ),
+                    right: BorderSide(
+                      width: 6.0,
+                      color: Color.fromARGB(80, 255, 255, 255),
+                    ),
+                    bottom: BorderSide(
+                      width: 6.0,
+                      color: Color.fromARGB(160, 255, 255, 255),
+                    ),
+                  ),
                   actions: [
                     TextButton(
-                        onPressed: () => Navigator.pop(context, '取消'),
-                        child: const Text("取消")),
+                      onPressed: () => Navigator.pop(context, '取消'),
+                      child: const Text(
+                        "取消",
+                        style: TextStyle(
+                          color: Color.fromARGB(160, 255, 255, 255),
+                        ),
+                      ),
+                    ),
                     TextButton(
                       onPressed: downloading
                           ? () {
@@ -327,9 +361,13 @@ class _DownloadState extends State<Download> {
                             },
                       child: Text(
                         downloading ? "停止下载" : "开始下载",
+                        style: const TextStyle(
+                          color: Color.fromARGB(160, 255, 255, 255),
+                        ),
                       ),
                     )
                   ],
+                  actionsAlignment: MainAxisAlignment.center,
                 ),
               );
             },
