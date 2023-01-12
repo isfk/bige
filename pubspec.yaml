@@ -40,9 +40,7 @@ dependencies:
   permission_handler: ^10.2.0
   toast: ^0.3.0
   loading_indicator: ^3.1.0
-  cached_network_image: ^3.2.3
   auto_size_text: ^3.0.0
-  icons_launcher: ^2.0.6
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +52,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  icons_launcher: ^2.0.6
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -69,6 +68,30 @@ flutter:
   assets:
     - assets/lizhi.png
     - assets/ic_logo.png
+    - assets/cover/108个关键词.png
+    - assets/cover/1701.png
+    - assets/cover/8.png
+    - assets/cover/Imagine-2011.png
+    - assets/cover/io.png
+    - assets/cover/二零零九年十月十六日事件.png
+    - assets/cover/你好，郑州.png
+    - assets/cover/动静.png
+    - assets/cover/勾三搭四.png
+    - assets/cover/北京不插电.png
+    - assets/cover/在每一条伤心的应天大街上.png
+    - assets/cover/家.png
+    - assets/cover/工体东路没有人.png
+    - assets/cover/广场合集.png
+    - assets/cover/我们也爱南京.png
+    - assets/cover/我爱南京.png
+    - assets/cover/电声与管弦乐.png
+    - assets/cover/电声与管弦乐II.png
+    - assets/cover/看见.png
+    - assets/cover/被禁忌的游戏.png
+    - assets/cover/这个世界会好吗.png
+    - assets/cover/零碎.png
+    - assets/cover/F.png
+    - assets/cover/梵高先生.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

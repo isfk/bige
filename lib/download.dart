@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:bige/music.dart';
 import 'package:bige/utils.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,16 +20,13 @@ class Download extends StatefulWidget {
 
 class _DownloadState extends State<Download> {
   final ScrollController _controller = ScrollController();
-  var tempPath = "";
-  var destPath = "";
-  var url =
-      "https://testingcf.jsdelivr.net/gh/nj-lizhi/song@main/audio/list-v2.js";
+  var destBasePath = "";
   var chunk = 5;
   var loading = true;
   var downloading = false;
   var pauseDownloading = false;
-  var downloadI = 0;
-  var downloadMsg = "";
+  var downloadingI = 0;
+  var downloadingMsg = "";
 
   List<Music> musics = [];
   List<int> chunkCountAll = [0, 0, 0, 0, 0];
@@ -38,13 +34,31 @@ class _DownloadState extends State<Download> {
   void getMusics() async {
     List<Music> list = [];
     var data = jsonDecode(getJsonStr());
+    var firstI = 0;
     for (var d in data) {
-      list.add(Music.fromJson(d));
+      var m = Music.fromJson(d);
+      if (await isMusicExists(m.url!)) {
+        m.downloaded = "已下载";
+      } else {
+        m.downloaded = "未下载";
+      }
+      list.add(m);
     }
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].downloaded == "未下载") {
+        firstI = i;
+        break;
+      }
+    }
+
     setState(() {
       musics = list;
       loading = false;
+      downloadingI = firstI;
     });
+
+    // var url =
+    // "https://testingcf.jsdelivr.net/gh/nj-lizhi/song@main/audio/list-v2.js";
     // var dio = Dio();
     // dio
     //     .get(url, options: Options(receiveDataWhenStatusError: true))
@@ -81,7 +95,7 @@ class _DownloadState extends State<Download> {
         if (!restart) {
           if (pauseDownloading) {
             setState(() {
-              downloadMsg = "暂停下载";
+              downloadingMsg = "暂停下载";
               downloading = false;
             });
             showToast(context, "暂停下载");
@@ -92,10 +106,10 @@ class _DownloadState extends State<Download> {
         if (i >= musics.length) {
           showToast(context, "所有歌曲下载完成", duration: 10);
           setState(() {
-            downloadI = 0;
+            downloadingI = 0;
             downloading = false;
             pauseDownloading = false;
-            downloadMsg = "";
+            downloadingMsg = "";
           });
           return;
         }
@@ -103,108 +117,100 @@ class _DownloadState extends State<Download> {
         setState(() {
           downloading = true;
           pauseDownloading = false;
-          downloadI = i;
+          downloadingI = i;
         });
 
-        var saveDir = Directory(destPath);
+        // 创建目录
+        var saveDir = Directory(destBasePath);
         if (!saveDir.existsSync()) {
           saveDir.createSync();
         }
 
         Future.delayed(Duration.zero, () {}).then((value) async {
           var music = musics[i];
+
+          if (music.downloaded == "已下载") {
+            // 跳过，继续下载
+            startDownload(i: ++i);
+            return;
+          }
           log("${music.name} 开始下载");
-          var s = music.url!.split("/audio/");
-          if (s.length == 2) {
-            var s1 = s[1].split("/");
-            if (s1.length == 2) {
-              var saveDestPath = "$destPath/${s1[0]}";
-              var saveDestFilePath = destPath + s[1];
 
-              var saveTempPath = tempPath + s1[0];
-              var saveTempFilePath = tempPath + s[1];
+          var saveDestPath = await getDestPath(music.artist!);
+          var saveDestFilePath = await getDestFilePath(music.url!);
+          var saveTempPath = await getTempPath(music.artist!);
+          var saveTempFilePath = await getTempFilePath(music.url!);
 
-              try {
-                var saveDestDir = Directory(saveDestPath);
-                if (!saveDestDir.existsSync()) {
-                  saveDestDir.createSync();
-                }
-
-                // Music 目录下是否已经存在
-                var saveDestFile = File(saveDestFilePath);
-                if (saveDestFile.existsSync()) {
-                  music.downloaded = "已存在";
-                  musics[i] = music;
-                  setState(() {
-                    musics = musics;
-                  });
-                  i++;
-                  startDownload(i: i);
-                  return;
-                }
-
-                var saveTempDir = Directory(saveTempPath);
-                if (!saveTempDir.existsSync()) {
-                  saveTempDir.createSync();
-                }
-              } catch (e) {
-                log(e.toString());
-              }
-
-              // 开始下载
-              try {
-                var total = 0;
-                var start = 0;
-                var end = 0;
-                _controller.animateTo(
-                  i > 0 ? (i - 1) * 80 : 0,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeIn,
-                );
-
-                // 探测文件大小
-                total = await getTotal(music.url!);
-                if (total == 0) return;
-                var chunkSize = (total / chunk).ceil();
-                end += chunkSize;
-                var futures = <Future>[];
-                for (var j = 0; j < chunk; j++) {
-                  if (end > total) end = total;
-
-                  var temp = "${saveTempFilePath}_$j";
-                  var f = File(temp);
-                  if (f.existsSync() && (f.lengthSync() == chunkSize + 1)) {
-                    // 存在 大小相同
-                    chunkCountAll[j] = f.lengthSync();
-                  } else {
-                    // 下载 或 重新下载 chunk
-                    futures.add(
-                        downloadChunk(i, j, music, temp, start, end, total));
-                    chunkCountAll[j] = 0;
-                  }
-                  setState(() {
-                    chunkCountAll = chunkCountAll;
-                  });
-                  start += chunkSize;
-                  end += chunkSize;
-                }
-
-                await Future.wait(futures);
-
-                // 合并 块
-                mergeChunk(chunk, saveTempFilePath, saveDestFilePath);
-
-                music.downloaded = "已下载";
-                musics[i] = music;
-                setState(() {
-                  musics = musics;
-                });
-
-                startDownload(i: ++i);
-              } catch (e) {
-                log(e.toString());
-              }
+          // 创建目录
+          try {
+            var saveDestDir = Directory(saveDestPath);
+            if (!saveDestDir.existsSync()) {
+              saveDestDir.createSync();
             }
+
+            var saveTempDir = Directory(saveTempPath);
+            if (!saveTempDir.existsSync()) {
+              saveTempDir.createSync();
+            }
+          } catch (e) {
+            log(e.toString());
+          }
+
+          // 开始下载
+          try {
+            var total = 0;
+            var start = 0;
+            var end = 0;
+            _controller.animateTo(
+              i > 0 ? (i - 1) * 80 : 0,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeIn,
+            );
+
+            setState(() {
+              downloadingMsg = "分析中: ${music.name}";
+            });
+
+            // 探测文件大小
+            total = await getRangeTotal(music.url!);
+            if (total == 0) return;
+            var chunkSize = (total / chunk).ceil();
+            end += chunkSize;
+            var futures = <Future>[];
+            for (var j = 0; j < chunk; j++) {
+              if (end > total) end = total;
+              var temp = "${saveTempFilePath}_$j";
+              var f = File(temp);
+              if (f.existsSync() && (f.lengthSync() == chunkSize + 1)) {
+                // 存在 大小相同
+                chunkCountAll[j] = f.lengthSync();
+              } else {
+                // 下载 或 重新下载 chunk
+                futures
+                    .add(downloadChunk(i, j, music, temp, start, end, total));
+                chunkCountAll[j] = 0;
+              }
+              setState(() {
+                chunkCountAll = chunkCountAll;
+              });
+              start += chunkSize;
+              end += chunkSize;
+            }
+
+            await Future.wait(futures);
+
+            // 合并 块
+            mergeChunk(chunk, saveTempFilePath, saveDestFilePath);
+
+            music.downloaded = "已下载";
+            musics[i] = music;
+            setState(() {
+              musics = musics;
+            });
+
+            startDownload(i: ++i);
+          } catch (e) {
+            log(e.toString());
           }
         });
       } else {
@@ -218,21 +224,6 @@ class _DownloadState extends State<Download> {
     setState(() {
       pauseDownloading = true;
     });
-  }
-
-  Future<int> getTotal(String fileUrl) async {
-    var response = await Dio().head(
-      fileUrl,
-      options: Options(
-        responseType: ResponseType.stream,
-        followRedirects: false,
-        headers: {
-          "range": "bytes=0-0",
-        },
-      ),
-    );
-    var rh = response.headers.value(HttpHeaders.contentRangeHeader);
-    return int.parse(rh!.split("/").last);
   }
 
   Future<Response> downloadChunk(int i, int j, Music music, String tempFile,
@@ -268,25 +259,10 @@ class _DownloadState extends State<Download> {
         musics[i] = music;
         setState(() {
           musics = musics;
-          downloadMsg = "正在下载：${music.name} $msg";
+          downloadingMsg = "下载中: ${music.name} $msg";
         });
       },
     );
-  }
-
-  void mergeChunk(int chunk, String tempFile, String saveFile) async {
-    var f0 = File("${tempFile}_0");
-    IOSink ioSink = f0.openWrite(mode: FileMode.writeOnlyAppend);
-    for (var i = 1; i < chunk; i++) {
-      var f = File("${tempFile}_$i");
-      await ioSink.addStream(f.openRead());
-      await f.delete();
-    }
-
-    await ioSink.close();
-
-    await f0.copy(saveFile);
-    await f0.delete();
   }
 
   @override
@@ -294,14 +270,9 @@ class _DownloadState extends State<Download> {
     super.initState();
     getMusics();
 
-    getMusicPath(type: 0).then((value) {
-      setState(() {
-        tempPath = value;
-      });
-    });
     getMusicPath(type: 1).then((value) {
       setState(() {
-        destPath = value;
+        destBasePath = value;
       });
     });
   }
@@ -318,7 +289,7 @@ class _DownloadState extends State<Download> {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: AutoSizeText(
-          downloadMsg.isNotEmpty ? downloadMsg : "逼歌",
+          downloadingMsg.isNotEmpty ? downloadingMsg : "逼歌",
           style: const TextStyle(
             fontSize: 20,
             color: Color.fromARGB(160, 255, 255, 255),
@@ -332,7 +303,7 @@ class _DownloadState extends State<Download> {
             ? PreferredSize(
                 preferredSize: const Size.fromHeight(4),
                 child: LinearProgressIndicator(
-                  value: downloadI / musics.length,
+                  value: downloadingI / musics.length,
                   semanticsLabel: '下载总进度',
                   valueColor: const AlwaysStoppedAnimation<Color>(
                     Color.fromARGB(160, 255, 255, 255),
@@ -347,8 +318,8 @@ class _DownloadState extends State<Download> {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text("下载 ${musics.length} 首歌?"),
-                  content: Text("保存路径: \n $destPath"),
+                  title: const Text("下载全部?"),
+                  content: Text("下载路径: \n $destBasePath"),
                   actions: [
                     TextButton(
                         onPressed: () => Navigator.pop(context, '取消'),
@@ -362,7 +333,7 @@ class _DownloadState extends State<Download> {
                           : () => pauseDownloading
                               ? {
                                   Navigator.pop(context, '恢复下载'),
-                                  startDownload(i: downloadI, restart: true)
+                                  startDownload(i: downloadingI, restart: true)
                                 }
                               : {
                                   Navigator.pop(context, '开始下载'),
@@ -451,7 +422,7 @@ class _MusicItemState extends State<MusicItem> {
         margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: CachedNetworkImageProvider(widget.music.cover!),
+            image: AssetImage(getCoverPng(widget.music.artist!)),
             colorFilter: const ColorFilter.mode(Colors.black, BlendMode.hue),
             fit: BoxFit.contain,
             alignment: Alignment.topLeft,
