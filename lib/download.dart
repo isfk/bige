@@ -24,7 +24,6 @@ class _DownloadState extends State<Download> {
   var chunk = 5;
   var loading = true;
   var downloading = false;
-  var pauseDownloading = false;
   var downloadingI = 0;
   var downloadingMsg = "";
   var cancelToken = CancelToken();
@@ -98,7 +97,6 @@ class _DownloadState extends State<Download> {
           setState(() {
             downloadingI = 0;
             downloading = false;
-            pauseDownloading = false;
             downloadingMsg = "";
           });
           return;
@@ -107,7 +105,6 @@ class _DownloadState extends State<Download> {
         setState(() {
           cancelToken = CancelToken();
           downloading = true;
-          pauseDownloading = false;
           downloadingI = i;
         });
 
@@ -214,7 +211,6 @@ class _DownloadState extends State<Download> {
     cancelToken.cancel("您取消了下载");
     // showToast(context, "当前歌曲下载完停止", duration: 10);
     setState(() {
-      pauseDownloading = true;
       downloading = false;
       downloadingMsg = "逼歌";
     });
@@ -294,7 +290,7 @@ class _DownloadState extends State<Download> {
         ),
         backgroundColor: const Color.fromARGB(40, 255, 255, 255),
         elevation: 0,
-        bottom: downloading || pauseDownloading
+        bottom: downloading
             ? PreferredSize(
                 preferredSize: const Size.fromHeight(4),
                 child: LinearProgressIndicator(
@@ -322,22 +318,15 @@ class _DownloadState extends State<Download> {
                     TextButton(
                       onPressed: downloading
                           ? () {
-                              Navigator.pop(context, '暂停下载');
+                              Navigator.pop(context, '停止下载');
                               pauseDownload();
                             }
-                          : () => pauseDownloading
-                              ? {
-                                  Navigator.pop(context, '恢复下载'),
-                                  startDownload(i: downloadingI, restart: true)
-                                }
-                              : {
-                                  Navigator.pop(context, '开始下载'),
-                                  startDownload(),
-                                },
+                          : () {
+                              Navigator.pop(context, '开始下载');
+                              startDownload();
+                            },
                       child: Text(
-                        downloading
-                            ? "停止下载"
-                            : (pauseDownloading ? "恢复下载" : "开始下载"),
+                        downloading ? "停止下载" : "开始下载",
                       ),
                     )
                   ],
