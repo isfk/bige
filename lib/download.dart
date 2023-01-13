@@ -5,11 +5,13 @@ import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:bige/music.dart';
-import 'package:bige/utils.dart';
+import 'package:bige/common/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+
+import 'common/global.dart';
 
 class Download extends StatefulWidget {
   const Download({super.key});
@@ -19,6 +21,8 @@ class Download extends StatefulWidget {
 }
 
 class _DownloadState extends State<Download> {
+  String platform = Global.platformVal;
+
   final ScrollController _controller = ScrollController();
   var destBasePath = "";
   var chunk = 5;
@@ -128,7 +132,10 @@ class _DownloadState extends State<Download> {
           var saveDestFilePath = await getDestFilePath(music.url!);
           var saveTempPath = await getTempPath(music.artist!);
           var saveTempFilePath = await getTempFilePath(music.url!);
-
+          log("saveDestPath ... $saveDestPath");
+          log("saveDestFilePath ... $saveDestFilePath");
+          log("saveTempPath ... $saveTempPath");
+          log("saveTempFilePath ... $saveTempFilePath");
           // 创建目录
           try {
             var saveDestDir = Directory(saveDestPath);
@@ -150,7 +157,7 @@ class _DownloadState extends State<Download> {
             var start = 0;
             var end = 0;
             _controller.animateTo(
-              i > 0 ? (i - 1) * 80 : 0,
+              i > 0 ? (i - 1) * Global.musicItemHeight : 0,
               duration: const Duration(milliseconds: 500),
               curve: Curves.easeIn,
             );
@@ -277,7 +284,7 @@ class _DownloadState extends State<Download> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(40, 255, 255, 255),
       appBar: AppBar(
         title: AutoSizeText(
           downloadingMsg.isNotEmpty ? downloadingMsg : "逼歌",
@@ -288,7 +295,7 @@ class _DownloadState extends State<Download> {
           minFontSize: 14,
           maxLines: 1,
         ),
-        backgroundColor: const Color.fromARGB(40, 255, 255, 255),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         bottom: downloading
             ? PreferredSize(
@@ -439,7 +446,7 @@ class _MusicItemState extends State<MusicItem> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 80,
+      height: Global.musicItemHeight,
       child: Container(
         margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
         decoration: BoxDecoration(
@@ -454,7 +461,10 @@ class _MusicItemState extends State<MusicItem> {
         ),
         padding: const EdgeInsets.all(10),
         child: Padding(
-          padding: const EdgeInsets.only(left: 70),
+          padding: EdgeInsets.only(
+              left: Theme.of(context).platform == TargetPlatform.android
+                  ? 70
+                  : 80),
           child: Stack(
             children: [
               Column(

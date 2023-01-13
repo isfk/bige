@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -15,6 +16,9 @@ void showToast(BuildContext context, String msg,
 
 // 检测是否开启媒体权限
 Future<bool> checkPermission() async {
+  if (!Platform.isAndroid) {
+    return true;
+  }
   var status = await Permission.storage.status;
   if (status != PermissionStatus.granted) {
     var res = await Permission.storage.request();
@@ -26,15 +30,28 @@ Future<bool> checkPermission() async {
   return true;
 }
 
-// 指定目录 #TODO
+// 指定目录
 Future<String> getMusicPath({int type = 0}) async {
-  var dir = await getExternalStorageDirectory();
-  var path = "${dir!.path}/";
+  var path = "";
 
-  switch (type) {
-    case 1:
-      path = "/storage/emulated/0/Music/";
-      break;
+  if (Platform.isAndroid) {
+    var dir = await getExternalStorageDirectory();
+    path = "${dir!.path}/";
+
+    if (type != 1) return path;
+
+    log("android path type 1 ... $path");
+    return path = "/storage/emulated/0/Music/";
+  }
+
+  if (Platform.isIOS) {
+    var dir = await getApplicationSupportDirectory();
+    path = "${dir.path}/";
+
+    if (type != 1) return path;
+
+    var dir1 = await getApplicationSupportDirectory();
+    return "${dir1.path}/";
   }
 
   return path;
