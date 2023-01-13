@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:toast/toast.dart';
@@ -40,7 +40,6 @@ Future<String> getMusicPath({int type = 0}) async {
 
     if (type != 1) return path;
 
-    log("android path type 1 ... $path");
     return path = "/storage/emulated/0/Music/";
   }
 
@@ -131,4 +130,9 @@ void mergeChunk(int chunk, String tempFile, String saveFile) async {
 
   await f0.copy(saveFile);
   await f0.delete();
+}
+
+Future<Metadata> getMetatada(String file) async {
+  var metadata = await MetadataRetriever.fromFile(File(file));
+  return metadata;
 }

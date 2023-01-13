@@ -424,7 +424,163 @@ class _DownloadState extends State<Download> {
                 itemCount: musics.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
-                    onTap: () => {},
+                    onTap: () async {
+                      if (musics[index].downloaded == "未下载") {
+                        showToast(context, "未下载");
+                        return;
+                      }
+                      var file = await getDestFilePath(musics[index].url!);
+                      var metadata = await getMetatada(file);
+                      log(metadata.toString());
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text(
+                            "歌曲信息:",
+                            style: TextStyle(
+                              color: Color.fromARGB(160, 255, 255, 255),
+                            ),
+                          ),
+                          backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 15),
+                                child: metadata.albumArt != null
+                                    ? Image.memory(
+                                        metadata.albumArt!,
+                                        width: 100,
+                                      )
+                                    : Image.asset(
+                                        "assets/cover/io.png",
+                                        width: 100,
+                                      ),
+                              ),
+                              SizedBox(
+                                height: 30,
+                                child: ListTile(
+                                  leading: const SizedBox(
+                                    width: 10,
+                                    child: Icon(
+                                      CupertinoIcons.tag_circle_fill,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ),
+                                  title: Transform(
+                                    transform:
+                                        Matrix4.translationValues(-30, 0, 0),
+                                    child: Text(
+                                      metadata.trackName ?? "未知",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 30,
+                                child: ListTile(
+                                  leading: const Icon(
+                                    CupertinoIcons.smallcircle_circle_fill,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                  title: Transform(
+                                    transform:
+                                        Matrix4.translationValues(-30, 0, 0),
+                                    child: Text(
+                                      metadata.albumName ?? "未知",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 30,
+                                child: ListTile(
+                                  leading: const Icon(
+                                    CupertinoIcons.person_circle_fill,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                  title: Transform(
+                                    transform:
+                                        Matrix4.translationValues(-30, 0, 0),
+                                    child: Text(
+                                      metadata.albumArtistName ??
+                                          metadata.trackArtistNames
+                                              .toString()
+                                              .replaceAll("[", "")
+                                              .replaceAll("]", ""),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          contentTextStyle: const TextStyle(
+                            color: Color.fromARGB(160, 255, 255, 255),
+                          ),
+                          shape: const Border(
+                            top: BorderSide(
+                              width: 6.0,
+                              color: Color.fromARGB(160, 255, 255, 255),
+                            ),
+                            left: BorderSide(
+                              width: 6.0,
+                              color: Color.fromARGB(80, 255, 255, 255),
+                            ),
+                            right: BorderSide(
+                              width: 6.0,
+                              color: Color.fromARGB(80, 255, 255, 255),
+                            ),
+                            bottom: BorderSide(
+                              width: 6.0,
+                              color: Color.fromARGB(160, 255, 255, 255),
+                            ),
+                          ),
+                          // actions: [
+                          //   TextButton(
+                          //     onPressed: () => Navigator.pop(context, '关闭窗口'),
+                          //     child: const Text(
+                          //       "关闭窗口",
+                          //       style: TextStyle(
+                          //         color: Color.fromARGB(160, 255, 255, 255),
+                          //       ),
+                          //     ),
+                          //   ),
+                          //   TextButton(
+                          //     onPressed: () {
+                          //       musics[index].downloaded == "未下载"
+                          //           ? Navigator.pop(context, '下载歌曲')
+                          //           : Navigator.pop(context, '删除歌曲');
+                          //     },
+                          //     child: Text(
+                          //       musics[index].downloaded == "未下载"
+                          //           ? "下载歌曲"
+                          //           : "删除歌曲",
+                          //       style: const TextStyle(
+                          //         color: Color.fromARGB(160, 255, 255, 255),
+                          //       ),
+                          //     ),
+                          //   )
+                          // ],
+                          // actionsAlignment: MainAxisAlignment.center,
+                        ),
+                      );
+                    },
                     child: MusicItem(music: musics[index]),
                   );
                 },
