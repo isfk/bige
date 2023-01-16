@@ -1,0 +1,35 @@
+PODS:
+  - flutter_media_metadata (0.0.1):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+  - path_provider_macos (0.0.1):
+    - FlutterMacOS
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - flutter_media_metadata (from `Flutter/ephemeral/.symlinks/plugins/flutter_media_metadata/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
+  - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/macos`)
+
+EXTERNAL SOURCES:
+  flutter_media_metadata:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_media_metadata/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  path_provider_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos
+  shared_preferences_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/macos
+
+SPEC CHECKSUMS:
+  flutter_media_metadata: 53b97e47b0d37828b706c35d64c01694e2710340
+  FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
+  path_provider_macos: 2b7e263b9e4837c2818bb13c0a7d1912d1d3b728
+  shared_preferences_foundation: 6ba071dca4c6b27a4171cebbb1d52a8d3af9496f
+
+PODFILE CHECKSUM: a884f6dd3f7494f3892ee6c81feea3a3abbf9153
+
+COCOAPODS: 1.11.3
