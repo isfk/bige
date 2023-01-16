@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get/instance_manager.dart';
@@ -91,28 +92,72 @@ class HomePage extends StatelessWidget {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                        onPressed: () => c.prev(), child: const Text("上一首")),
-                    ElevatedButton(
-                        onPressed: () {
-                          if (c.audioPlayer.state == PlayerState.stopped) {
-                            c.play(0);
-                            return;
-                          }
-                          if (c.audioPlayer.state != PlayerState.playing) {
-                            c.resume();
-                          } else {
-                            c.pause();
-                          }
-                        },
-                        child: Text(c.isPlaying.value == true ? "暂停" : "播放")),
-                    ElevatedButton(
-                        onPressed: () => c.next(), child: const Text("下一首")),
-                  ],
-                ))
+                child: Container(
+                  height: 90,
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color.fromARGB(40, 0, 0, 0),
+                        offset: Offset(0, -10),
+                        blurRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Center(
+                          child: Text(
+                            c.playMusic.value.name,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 18),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: () => c.prev(),
+                            icon: const Icon(
+                              CupertinoIcons.arrow_left,
+                              color: Colors.white,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              if (c.audioPlayer.state == PlayerState.stopped) {
+                                c.play(0);
+                                return;
+                              }
+                              if (c.audioPlayer.state != PlayerState.playing) {
+                                c.resume();
+                              } else {
+                                c.pause();
+                              }
+                            },
+                            icon: Icon(
+                              c.isPlaying.value == true
+                                  ? Icons.pause
+                                  : Icons.play_arrow,
+                              color: Colors.white,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => c.next(),
+                            icon: const Icon(
+                              CupertinoIcons.arrow_right,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )),
           ]),
         ),
       ),
