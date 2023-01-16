@@ -24,12 +24,12 @@ class _MusicItemState extends State<MusicItem> {
         margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(getCoverPng(widget.music.artist!)),
-            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.hue),
+            image: AssetImage(getCoverPng(widget.music.artist)),
+            // colorFilter: const ColorFilter.mode(Colors.black, BlendMode.hue),
             fit: BoxFit.contain,
             alignment: Alignment.topLeft,
           ),
-          color: const Color.fromARGB(40, 255, 255, 255),
+          color: const Color.fromARGB(255, 255, 255, 255),
           borderRadius: const BorderRadius.all(Radius.circular(5)),
         ),
         padding: const EdgeInsets.all(10),
@@ -45,7 +45,7 @@ class _MusicItemState extends State<MusicItem> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
-                      color: Color.fromARGB(160, 255, 255, 255),
+                      // color: Color.fromARGB(160, 255, 255, 255),
                     ),
                     minFontSize: 14,
                     maxLines: 1,
@@ -56,7 +56,7 @@ class _MusicItemState extends State<MusicItem> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontStyle: FontStyle.italic,
-                      color: Color.fromARGB(80, 255, 255, 255),
+                      // color: Color.fromARGB(80, 255, 255, 255),
                     ),
                   ),
                 ],
@@ -69,7 +69,7 @@ class _MusicItemState extends State<MusicItem> {
                   style: TextStyle(
                     fontSize: 14,
                     fontStyle: FontStyle.italic,
-                    color: Color.fromARGB(80, 255, 255, 255),
+                    // color: Color.fromARGB(80, 255, 255, 255),
                   ),
                 ),
               )

@@ -105,4 +105,8 @@ class MusicController extends GetxController {
     isPlaying(true);
     await audioPlayer.play(UrlSource(playMusic.value.url));
   }
+
+  void shuffle() async {
+    list.shuffle();
+  }
 }
