@@ -14,6 +14,7 @@ class MusicController extends GetxController {
   List<Music> list = <Music>[].obs;
   Rx<Music> playMusic = Music().obs;
   RxInt playIndex = 0.obs;
+  final isPlaying = false.obs;
 
   AudioPlayer audioPlayer = AudioPlayer();
   Duration playProcess = const Duration();
@@ -49,31 +50,48 @@ class MusicController extends GetxController {
     playIndex(i);
     playMusic(list[i]);
     playerState = PlayerState.playing;
+    isPlaying(true);
     await audioPlayer.play(UrlSource(list[i].url));
   }
 
   void pause() async {
     log("pause...  ${list[playIndex.value].name}");
     playerState = PlayerState.paused;
+    isPlaying(false);
     await audioPlayer.pause();
   }
 
   void stop() async {
     log("stop... ${list[playIndex.value].name}");
     playerState = PlayerState.stopped;
+    isPlaying(false);
     await audioPlayer.stop();
   }
 
   void resume() async {
     log("resume... ${list[playIndex.value].name}");
     playerState = PlayerState.playing;
+    isPlaying(true);
     await audioPlayer.resume();
   }
 
   void release() async {
     log("release... ${list[playIndex.value].name}");
     playerState = PlayerState.completed;
+    isPlaying(false);
     await audioPlayer.release();
+  }
+
+  void prev() async {
+    playIndex -= 1;
+    if (playIndex < 0) {
+      playIndex(0);
+    }
+    playMusic(list[playIndex()]);
+    log("next... ${playMusic.value.name}");
+    playerState = PlayerState.playing;
+    isPlaying(true);
+    await audioPlayer.play(UrlSource(playMusic.value.url));
   }
 
   void next() async {
@@ -84,6 +102,7 @@ class MusicController extends GetxController {
     playMusic(list[playIndex()]);
     log("next... ${playMusic.value.name}");
     playerState = PlayerState.playing;
+    isPlaying(true);
     await audioPlayer.play(UrlSource(playMusic.value.url));
   }
 }

@@ -59,33 +59,61 @@ class HomePage extends StatelessWidget {
               alignment: Alignment.bottomRight,
             ),
           ),
-          child: ListView.builder(
-            padding: const EdgeInsets.only(bottom: 10),
-            controller: controller,
-            itemCount: c.list.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                child: MusicItem(music: c.list[index]),
-                onTap: () {
-                  if (c.playIndex.value != index) {
-                    // 切歌
-                    c.play(index);
-                    return;
-                  }
+          child: Stack(children: [
+            ListView.builder(
+              padding: const EdgeInsets.only(bottom: 10),
+              controller: controller,
+              itemCount: c.list.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  child: MusicItem(music: c.list[index]),
+                  onTap: () {
+                    if (c.playIndex.value != index) {
+                      // 切歌
+                      c.play(index);
+                      return;
+                    }
 
-                  if (c.audioPlayer.state == PlayerState.stopped) {
-                    c.play(index);
-                    return;
-                  }
-                  if (c.audioPlayer.state != PlayerState.playing) {
-                    c.resume();
-                  } else {
-                    c.pause();
-                  }
-                },
-              );
-            },
-          ),
+                    if (c.audioPlayer.state == PlayerState.stopped) {
+                      c.play(index);
+                      return;
+                    }
+                    if (c.audioPlayer.state != PlayerState.playing) {
+                      c.resume();
+                    } else {
+                      c.pause();
+                    }
+                  },
+                );
+              },
+            ),
+            Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                        onPressed: () => c.prev(), child: const Text("上一首")),
+                    ElevatedButton(
+                        onPressed: () {
+                          if (c.audioPlayer.state == PlayerState.stopped) {
+                            c.play(0);
+                            return;
+                          }
+                          if (c.audioPlayer.state != PlayerState.playing) {
+                            c.resume();
+                          } else {
+                            c.pause();
+                          }
+                        },
+                        child: Text(c.isPlaying.value == true ? "暂停" : "播放")),
+                    ElevatedButton(
+                        onPressed: () => c.next(), child: const Text("下一首")),
+                  ],
+                ))
+          ]),
         ),
       ),
     );
