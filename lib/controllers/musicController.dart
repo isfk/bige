@@ -88,7 +88,7 @@ class MusicController extends GetxController {
       playIndex(0);
     }
     playMusic(list[playIndex()]);
-    log("next... ${playMusic.value.name}");
+    log("prev... ${playMusic.value.name}");
     playerState = PlayerState.playing;
     isPlaying(true);
     await audioPlayer.play(UrlSource(playMusic.value.url));
