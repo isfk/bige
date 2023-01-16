@@ -1,18 +1,16 @@
 class Music {
-  String? name;
-  String? artist;
-  String? url;
-  String? cover;
-  late String downloaded;
+  late String name;
+  late String artist;
+  late String url;
+  late String cover;
 
-  Music({this.name, this.artist, this.url, required this.downloaded});
+  Music({this.name = "", this.artist = "", this.url = ""});
 
   Music.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     artist = json['artist'];
     url = json['url'];
     cover = json['cover'];
-    downloaded = "未下载";
   }
 
   Map<String, dynamic> toJson() {
@@ -21,7 +19,6 @@ class Music {
     data['artist'] = artist;
     data['url'] = url;
     data['cover'] = cover;
-    data['download'] = downloaded;
     return data;
   }
 }

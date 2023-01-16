@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
@@ -15,26 +16,38 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const AutoSizeText(
-          "播放器",
-          style: TextStyle(
-            fontSize: 20,
-            color: Color.fromARGB(160, 255, 255, 255),
-          ),
-          minFontSize: 14,
-          maxLines: 1,
-        ),
-        backgroundColor: Colors.black,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            color: Colors.black,
-            image: DecorationImage(
-              image: AssetImage("assets/lizhi.png"),
-              alignment: Alignment.centerLeft,
+      appBar: PreferredSize(
+        preferredSize: const Size(double.maxFinite, 56),
+        child: GestureDetector(
+          child: AppBar(
+            title: Obx(
+              () => AutoSizeText(
+                "播放器 ${c.playMusic.value.name}",
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Color.fromARGB(160, 255, 255, 255),
+                ),
+                minFontSize: 14,
+                maxLines: 1,
+              ),
+            ),
+            backgroundColor: Colors.black,
+            elevation: 0,
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                color: Colors.black,
+                image: DecorationImage(
+                  image: AssetImage("assets/lizhi.png"),
+                  alignment: Alignment.bottomRight,
+                ),
+              ),
             ),
           ),
+          onDoubleTap: () {
+            controller.animateTo(0,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.ease);
+          },
         ),
       ),
       body: Obx(
@@ -53,7 +66,23 @@ class HomePage extends StatelessWidget {
             itemBuilder: (context, index) {
               return GestureDetector(
                 child: MusicItem(music: c.list[index]),
-                onTap: () => {},
+                onTap: () {
+                  if (c.playIndex.value != index) {
+                    // 切歌
+                    c.play(index);
+                    return;
+                  }
+
+                  if (c.audioPlayer.state == PlayerState.stopped) {
+                    c.play(index);
+                    return;
+                  }
+                  if (c.audioPlayer.state != PlayerState.playing) {
+                    c.resume();
+                  } else {
+                    c.pause();
+                  }
+                },
               );
             },
           ),

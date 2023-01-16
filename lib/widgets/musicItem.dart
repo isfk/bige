@@ -34,14 +34,14 @@ class _MusicItemState extends State<MusicItem> {
         ),
         padding: const EdgeInsets.all(10),
         child: Padding(
-          padding: const EdgeInsets.only(left: 90),
+          padding: const EdgeInsets.only(left: 70),
           child: Stack(
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AutoSizeText(
-                    "${widget.music.name}",
+                    widget.music.name,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -52,7 +52,7 @@ class _MusicItemState extends State<MusicItem> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "${widget.music.artist}",
+                    widget.music.artist,
                     style: const TextStyle(
                       fontSize: 14,
                       fontStyle: FontStyle.italic,
@@ -61,12 +61,12 @@ class _MusicItemState extends State<MusicItem> {
                   ),
                 ],
               ),
-              Positioned(
+              const Positioned(
                 right: 0,
                 bottom: 0,
                 child: Text(
-                  widget.music.downloaded,
-                  style: const TextStyle(
+                  "未下载",
+                  style: TextStyle(
                     fontSize: 14,
                     fontStyle: FontStyle.italic,
                     color: Color.fromARGB(80, 255, 255, 255),

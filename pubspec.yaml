@@ -43,6 +43,7 @@ dependencies:
   flutter_media_metadata: ^1.0.0+1
   get: ^4.6.5
   auto_size_text: ^3.0.0
+  audioplayers: ^2.0.0
 
 dev_dependencies:
   flutter_test:
