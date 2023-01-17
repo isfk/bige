@@ -3,9 +3,19 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:player/pages/home.dart';
 
-void main() {
+Future<void> main() async {
+  await JustAudioBackground.init(
+    // androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelId: 'com.bige365.player',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+    artDownscaleHeight: 50,
+    artDownscaleWidth: 50,
+    // androidNotificationIcon: "assets/lizhi.png",
+  );
   runApp(const MyApp());
 }
 

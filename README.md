@@ -1,16 +1,27 @@
-# player
+# 逼歌
 
-A new Flutter project.
+- B 哥/逼哥/南京李志 歌曲下载
+- 歌单、专辑封面已进行本地化，歌曲资源从网络下载
+- 下载采用分块下载，支持断点续传
 
-## Getting Started
+## icon 生成
 
-This project is a starting point for a Flutter application.
+```
+flutter pub run icons_launcher:create
+```
 
-A few resources to get you started if this is your first Flutter project:
+## 说明
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- 使用 flutter 开发
+- 歌单地址 [list-v2.js](https://testingcf.jsdelivr.net/gh/nj-lizhi/song@master/audio/list-v2.js)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 感谢
+
+- [GoldSubmarine](https://github.com/GoldSubmarine)
+- [turkyden](https://github.com/turkyden)
+
+## 预览
+
+| 逼                                                                                                                              | 歌                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="https://user-images.githubusercontent.com/70327450/212083511-18b455c4-22e4-47f4-aea8-faa87608de7e.jpg" width="400" /> | <img src="https://user-images.githubusercontent.com/70327450/212083565-aa2249f9-3b2a-42ec-8f59-f10d999597d3.jpg" width="400" /> |
