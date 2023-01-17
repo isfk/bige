@@ -19,7 +19,7 @@ class _MusicItemState extends State<MusicItem> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: c.MusicItemHeight,
+      height: c.musicItemHeight,
       child: Container(
         margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
         decoration: BoxDecoration(

@@ -1,25 +1,26 @@
-// ignore_for_file: non_constant_identifier_names
-
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:player/data.dart';
 import 'package:player/models/music.dart';
 
 class MusicController extends GetxController {
-  double MusicItemHeight = 80;
+  double musicItemHeight = 80;
 
   List<Music> list = <Music>[].obs;
   Rx<Music> playMusic = Music().obs;
   RxInt playIndex = 0.obs;
   final isPlaying = false.obs;
+  final isLoading = false.obs;
 
-  AudioPlayer audioPlayer = AudioPlayer();
+  Rx<AudioPlayer> audioPlayer = AudioPlayer().obs;
   Duration playProcess = const Duration();
   Duration totalProcess = const Duration();
-  PlayerState playerState = PlayerState.stopped;
 
   @override
   void onInit() {
@@ -30,18 +31,34 @@ class MusicController extends GetxController {
       list.add(Music.fromJson(element));
     }
 
-    // audio player
-    audioPlayer.onDurationChanged.listen((Duration d) {
-      totalProcess = d;
-    });
-
-    audioPlayer.onPositionChanged.listen((Duration d) {
-      playProcess = d;
-    });
-
-    audioPlayer.onPlayerComplete.listen((event) {
-      log("播放完成");
-      next();
+    audioPlayer().playerStateStream.listen((state) {
+      if (state.playing) {
+        isPlaying(true);
+      } else {
+        isPlaying(false);
+      }
+      switch (state.processingState) {
+        case ProcessingState.idle:
+          log("idle");
+          isLoading(false);
+          break;
+        case ProcessingState.loading:
+          log("loading");
+          isLoading(true);
+          break;
+        case ProcessingState.buffering:
+          log("buffering");
+          isLoading(true);
+          break;
+        case ProcessingState.ready:
+          log("ready");
+          isLoading(false);
+          break;
+        case ProcessingState.completed:
+          log("completed");
+          isLoading(false);
+          next();
+      }
     });
   }
 
@@ -49,37 +66,18 @@ class MusicController extends GetxController {
     log("play... ${list[i].name}");
     playIndex(i);
     playMusic(list[i]);
-    playerState = PlayerState.playing;
-    isPlaying(true);
-    await audioPlayer.play(UrlSource(list[i].url));
+    await setAudioSource();
+    await audioPlayer().play();
   }
 
   void pause() async {
-    log("pause...  ${list[playIndex.value].name}");
-    playerState = PlayerState.paused;
-    isPlaying(false);
-    await audioPlayer.pause();
+    log("pause...  ${list[playIndex()].name}");
+    await audioPlayer().pause();
   }
 
   void stop() async {
-    log("stop... ${list[playIndex.value].name}");
-    playerState = PlayerState.stopped;
-    isPlaying(false);
-    await audioPlayer.stop();
-  }
-
-  void resume() async {
-    log("resume... ${list[playIndex.value].name}");
-    playerState = PlayerState.playing;
-    isPlaying(true);
-    await audioPlayer.resume();
-  }
-
-  void release() async {
-    log("release... ${list[playIndex.value].name}");
-    playerState = PlayerState.completed;
-    isPlaying(false);
-    await audioPlayer.release();
+    log("stop... ${list[playIndex()].name}");
+    await audioPlayer().stop();
   }
 
   void prev() async {
@@ -89,9 +87,8 @@ class MusicController extends GetxController {
     }
     playMusic(list[playIndex()]);
     log("prev... ${playMusic.value.name}");
-    playerState = PlayerState.playing;
-    isPlaying(true);
-    await audioPlayer.play(UrlSource(playMusic.value.url));
+    await setAudioSource();
+    await audioPlayer().play();
   }
 
   void next() async {
@@ -101,12 +98,114 @@ class MusicController extends GetxController {
     }
     playMusic(list[playIndex()]);
     log("next... ${playMusic.value.name}");
-    playerState = PlayerState.playing;
-    isPlaying(true);
-    await audioPlayer.play(UrlSource(playMusic.value.url));
+    await setAudioSource();
+    await audioPlayer().play();
   }
 
   void shuffle() async {
     list.shuffle();
+  }
+
+  setAudioSource() async {
+    return audioPlayer().setAudioSource(
+      AudioSource.uri(
+        Uri.parse(playMusic.value.url),
+        tag: MediaItem(
+          id: "${playIndex()}",
+          title: playMusic().name,
+          album: playMusic().artist,
+          displayTitle: playMusic().name,
+          displaySubtitle: playMusic().artist,
+          displayDescription: "我们不能失去信仰",
+          artUri: Uri.parse(playMusic().cover),
+        ),
+      ),
+    );
+  }
+
+  getControlPlayPause() {
+    if (isLoading() == true) {
+      return Stack(
+        children: [
+          IconButton(
+            iconSize: 60,
+            onPressed: () => play(playIndex()),
+            icon: const Icon(
+              CupertinoIcons.play_circle,
+              color: Color.fromARGB(200, 0, 0, 0),
+            ),
+          ),
+          Positioned(
+            left: 14,
+            top: -1,
+            child: Container(
+              margin: const EdgeInsets.only(top: 15),
+              width: 47.0,
+              height: 47.0,
+              child: const CircularProgressIndicator(),
+            ),
+          ),
+        ],
+      );
+    } else if (isPlaying() == true) {
+      return IconButton(
+        iconSize: 60,
+        onPressed: () => pause(),
+        icon: const Icon(
+          CupertinoIcons.pause_circle,
+          color: Color.fromARGB(200, 0, 0, 0),
+        ),
+      );
+    } else {
+      return IconButton(
+        iconSize: 60,
+        onPressed: () => play(playIndex()),
+        icon: const Icon(
+          CupertinoIcons.play_circle,
+          color: Color.fromARGB(200, 0, 0, 0),
+        ),
+      );
+    }
+  }
+
+  getControls() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        IconButton(
+          iconSize: 30,
+          onPressed: () => shuffle(),
+          icon: const Icon(
+            CupertinoIcons.shuffle,
+            color: Color.fromARGB(200, 0, 0, 0),
+          ),
+        ),
+        IconButton(
+          iconSize: 30,
+          onPressed: () => isLoading() ? null : prev(),
+          icon: const Icon(
+            CupertinoIcons.backward_fill,
+            color: Color.fromARGB(200, 0, 0, 0),
+          ),
+        ),
+        getControlPlayPause(),
+        IconButton(
+          iconSize: 30,
+          onPressed: () => isLoading() ? null : next(),
+          icon: const Icon(
+            CupertinoIcons.forward_fill,
+            color: Color.fromARGB(200, 0, 0, 0),
+          ),
+        ),
+        IconButton(
+          iconSize: 30,
+          onPressed: () {},
+          icon: const Icon(
+            CupertinoIcons.music_note_list,
+            color: Color.fromARGB(200, 0, 0, 0),
+          ),
+        ),
+      ],
+    );
   }
 }

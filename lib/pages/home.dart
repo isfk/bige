@@ -1,6 +1,4 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get/instance_manager.dart';
@@ -53,27 +51,18 @@ class HomePage extends StatelessWidget {
       body: Obx(
         () => Stack(children: [
           ListView.builder(
-            padding: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(bottom: 120),
             controller: controller,
             itemCount: c.list.length,
             itemBuilder: (context, index) {
               return GestureDetector(
                 child: MusicItem(music: c.list[index]),
                 onTap: () {
-                  if (c.playIndex.value != index) {
-                    // 切歌
-                    c.play(index);
-                    return;
-                  }
-
-                  if (c.audioPlayer.state == PlayerState.stopped) {
-                    c.play(index);
-                    return;
-                  }
-                  if (c.audioPlayer.state != PlayerState.playing) {
-                    c.resume();
-                  } else {
+                  if (c.isPlaying.value) {
                     c.pause();
+                    return;
+                  } else {
+                    c.play(index);
                   }
                 },
               );
@@ -117,63 +106,7 @@ class HomePage extends StatelessWidget {
                         maxLines: 1,
                       )),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        IconButton(
-                          iconSize: 30,
-                          onPressed: () => c.shuffle(),
-                          icon: const Icon(
-                            CupertinoIcons.shuffle,
-                            color: Color.fromARGB(200, 0, 0, 0),
-                          ),
-                        ),
-                        IconButton(
-                          iconSize: 30,
-                          onPressed: () => c.prev(),
-                          icon: const Icon(
-                            CupertinoIcons.backward_fill,
-                            color: Color.fromARGB(200, 0, 0, 0),
-                          ),
-                        ),
-                        IconButton(
-                          iconSize: 60,
-                          onPressed: () {
-                            if (c.audioPlayer.state == PlayerState.stopped) {
-                              c.play(0);
-                              return;
-                            }
-                            if (c.audioPlayer.state != PlayerState.playing) {
-                              c.resume();
-                            } else {
-                              c.pause();
-                            }
-                          },
-                          icon: Icon(
-                            c.isPlaying.value == true
-                                ? Icons.pause_circle
-                                : Icons.play_circle,
-                            color: const Color.fromARGB(200, 0, 0, 0),
-                          ),
-                        ),
-                        IconButton(
-                          iconSize: 30,
-                          onPressed: () => c.next(),
-                          icon: const Icon(
-                            CupertinoIcons.forward_fill,
-                            color: Color.fromARGB(200, 0, 0, 0),
-                          ),
-                        ),
-                        IconButton(
-                          iconSize: 30,
-                          onPressed: () {},
-                          icon: const Icon(
-                            CupertinoIcons.music_note_list,
-                            color: Color.fromARGB(200, 0, 0, 0),
-                          ),
-                        ),
-                      ],
-                    ),
+                    c.getControls(),
                   ],
                 ),
               )),
