@@ -62,7 +62,7 @@ class HomePage extends StatelessWidget {
                     c.pause();
                     return;
                   } else {
-                    c.play(index);
+                    c.play();
                   }
                 },
               );

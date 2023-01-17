@@ -13,6 +13,9 @@ class MusicController extends GetxController {
   double musicItemHeight = 80;
 
   List<Music> list = <Music>[].obs;
+  Rx<ConcatenatingAudioSource> playlist =
+      ConcatenatingAudioSource(children: []).obs;
+
   Rx<Music> playMusic = Music().obs;
   RxInt playIndex = 0.obs;
   final isPlaying = false.obs;
@@ -22,14 +25,38 @@ class MusicController extends GetxController {
   Duration playProcess = const Duration();
   Duration totalProcess = const Duration();
 
+  List<AudioSource> mediaList = [];
+
   @override
   void onInit() {
     super.onInit();
-
     // 生成列表
     for (var element in jsonDecode(getJsonData())) {
-      list.add(Music.fromJson(element));
+      var item = Music.fromJson(element);
+
+      list.add(item);
+
+      mediaList.add(
+        AudioSource.uri(
+          Uri.parse(item.url),
+          tag: MediaItem(
+            id: item.url,
+            title: item.name,
+            album: item.artist,
+            displayTitle: item.name,
+            displaySubtitle: item.artist,
+            displayDescription: "我们不能失去信仰",
+            artUri: Uri.parse(item.cover),
+          ),
+        ),
+      );
     }
+
+    audioPlayer().setAudioSource(
+      ConcatenatingAudioSource(children: mediaList),
+      initialIndex: 0,
+      initialPosition: Duration.zero,
+    );
 
     audioPlayer().playerStateStream.listen((state) {
       if (state.playing) {
@@ -60,67 +87,44 @@ class MusicController extends GetxController {
           next();
       }
     });
+    audioPlayer().currentIndexStream.listen((index) {
+      log("currentIndexStream: $index");
+      playMusic(list[int.parse(index.toString())]);
+    });
+    audioPlayer().positionStream.listen((position) {
+      // log("positionStream: $position");
+    });
+    audioPlayer().durationStream.listen((duration) {
+      // log("durationStream: $duration");
+    });
+    audioPlayer().shuffleModeEnabledStream.listen((shuffle) {
+      log("shuffleModeEnabledStream: $shuffle");
+    });
   }
 
-  void play(int i) async {
-    log("play... ${list[i].name}");
-    playIndex(i);
-    playMusic(list[i]);
-    await setAudioSource();
+  void play() async {
     await audioPlayer().play();
   }
 
   void pause() async {
-    log("pause...  ${list[playIndex()].name}");
     await audioPlayer().pause();
   }
 
   void stop() async {
-    log("stop... ${list[playIndex()].name}");
     await audioPlayer().stop();
   }
 
   void prev() async {
-    playIndex -= 1;
-    if (playIndex < 0) {
-      playIndex(0);
-    }
-    playMusic(list[playIndex()]);
-    log("prev... ${playMusic.value.name}");
-    await setAudioSource();
-    await audioPlayer().play();
+    await audioPlayer().seekToPrevious();
   }
 
   void next() async {
-    playIndex += 1;
-    if (playIndex > list.length - 1) {
-      playIndex(0);
-    }
-    playMusic(list[playIndex()]);
-    log("next... ${playMusic.value.name}");
-    await setAudioSource();
-    await audioPlayer().play();
+    await audioPlayer().seekToNext();
   }
 
   void shuffle() async {
-    list.shuffle();
-  }
-
-  setAudioSource() async {
-    return audioPlayer().setAudioSource(
-      AudioSource.uri(
-        Uri.parse(playMusic.value.url),
-        tag: MediaItem(
-          id: "${playIndex()}",
-          title: playMusic().name,
-          album: playMusic().artist,
-          displayTitle: playMusic().name,
-          displaySubtitle: playMusic().artist,
-          displayDescription: "我们不能失去信仰",
-          artUri: Uri.parse(playMusic().cover),
-        ),
-      ),
-    );
+    await audioPlayer().shuffle();
+    await audioPlayer().setShuffleModeEnabled(true);
   }
 
   getControlPlayPause() {
@@ -129,7 +133,7 @@ class MusicController extends GetxController {
         children: [
           IconButton(
             iconSize: 60,
-            onPressed: () => play(playIndex()),
+            onPressed: () => play(),
             icon: const Icon(
               CupertinoIcons.play_circle,
               color: Color.fromARGB(200, 0, 0, 0),
@@ -159,7 +163,7 @@ class MusicController extends GetxController {
     } else {
       return IconButton(
         iconSize: 60,
-        onPressed: () => play(playIndex()),
+        onPressed: () => play(),
         icon: const Icon(
           CupertinoIcons.play_circle,
           color: Color.fromARGB(200, 0, 0, 0),

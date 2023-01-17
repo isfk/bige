@@ -4,7 +4,7 @@ class Music {
   late String url;
   late String cover;
 
-  Music({this.name = "", this.artist = "", this.url = ""});
+  Music({this.name = "", this.artist = "", this.url = "", this.cover = ""});
 
   Music.fromJson(Map<String, dynamic> json) {
     name = json['name'];
