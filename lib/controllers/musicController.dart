@@ -23,7 +23,7 @@ class MusicController extends GetxController {
   final isLoading = false.obs;
 
   Rx<String> loopMode = "all".obs;
-  Rx<bool> shuffleMode = false.obs;
+  Rx<bool> shuffleMode = true.obs;
 
   Rx<AudioPlayer> audioPlayer = AudioPlayer().obs;
   Rx<Duration> playPosition = const Duration().obs;
@@ -57,7 +57,7 @@ class MusicController extends GetxController {
     }
 
     audioPlayer().setLoopMode(LoopMode.all);
-    audioPlayer().setShuffleModeEnabled(false);
+    audioPlayer().setShuffleModeEnabled(shuffleMode());
     audioPlayer().setAudioSource(
       ConcatenatingAudioSource(children: mediaList),
       initialIndex: 0,
