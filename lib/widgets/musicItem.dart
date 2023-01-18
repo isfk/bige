@@ -29,12 +29,12 @@ class _MusicItemState extends State<MusicItem> {
             fit: BoxFit.contain,
             alignment: Alignment.topLeft,
           ),
-          color: const Color.fromARGB(255, 255, 255, 255),
+          color: const Color.fromARGB(40, 200, 200, 200),
           borderRadius: const BorderRadius.all(Radius.circular(5)),
         ),
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
         child: Padding(
-          padding: const EdgeInsets.only(left: 70),
+          padding: const EdgeInsets.only(left: 60),
           child: Stack(
             children: [
               Column(
@@ -65,7 +65,7 @@ class _MusicItemState extends State<MusicItem> {
                 right: 0,
                 bottom: 0,
                 child: Text(
-                  "未下载",
+                  "",
                   style: TextStyle(
                     fontSize: 14,
                     fontStyle: FontStyle.italic,

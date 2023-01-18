@@ -38,11 +38,18 @@ class HomePage extends StatelessWidget {
                   alignment: Alignment.bottomRight,
                   fit: BoxFit.scaleDown,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color.fromARGB(50, 0, 0, 0),
+                    offset: Offset(0, 1),
+                    blurRadius: 5,
+                  ),
+                ],
               ),
             ),
           ),
           onDoubleTap: () {
-            controller.animateTo(c.playIndex() * 80,
+            controller.animateTo(c.playIndex() * 70,
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.ease);
           },
@@ -51,7 +58,7 @@ class HomePage extends StatelessWidget {
       body: Obx(
         () => Stack(children: [
           ListView.builder(
-            padding: const EdgeInsets.only(bottom: 100),
+            padding: const EdgeInsets.only(bottom: 120),
             controller: controller,
             itemCount: c.list.length,
             itemBuilder: (context, index) {
@@ -83,8 +90,8 @@ class HomePage extends StatelessWidget {
                   color: Color.fromARGB(255, 255, 255, 255),
                   boxShadow: [
                     BoxShadow(
-                      color: Color.fromARGB(95, 0, 0, 0),
-                      offset: Offset(0, -5),
+                      color: Color.fromARGB(50, 0, 0, 0),
+                      offset: Offset(0, -1),
                       blurRadius: 5,
                     ),
                   ],

@@ -11,7 +11,7 @@ import 'package:player/data.dart';
 import 'package:player/models/music.dart';
 
 class MusicController extends GetxController {
-  double musicItemHeight = 80;
+  double musicItemHeight = 70;
 
   List<Music> list = <Music>[].obs;
   Rx<ConcatenatingAudioSource> playlist =
