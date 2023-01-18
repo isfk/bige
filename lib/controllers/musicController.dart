@@ -20,12 +20,14 @@ class MusicController extends GetxController {
   final isPlaying = false.obs;
   final isLoading = false.obs;
 
-  Rx<String> loopMode = "all".obs;
-  Rx<bool> shuffleMode = true.obs;
+  RxString loopMode = "all".obs;
+  RxBool shuffleMode = true.obs;
 
   Rx<AudioPlayer> audioPlayer = AudioPlayer().obs;
   Rx<Duration> playPosition = const Duration().obs;
-  Duration totalProcess = const Duration();
+  Rx<Duration> playDuration = const Duration().obs;
+  RxDouble playProcess = (0.0).obs;
+  RxDouble totalProcess = (0.0).obs;
 
   List<AudioSource> mediaList = [];
 
@@ -104,8 +106,12 @@ class MusicController extends GetxController {
         playMusic(temp);
       }
     });
+    audioPlayer().durationStream.listen((duration) {
+      playDuration(duration);
+    });
     audioPlayer().positionStream.listen((position) {
       playPosition(position);
+      playProcess(position.inSeconds / playDuration().inSeconds);
     });
     audioPlayer().durationStream.listen((duration) {});
     audioPlayer().shuffleModeEnabledStream.listen((shuffle) {
@@ -237,7 +243,7 @@ class MusicController extends GetxController {
             onPressed: () => play(),
             icon: const Icon(
               CupertinoIcons.play_circle,
-              color: Color.fromARGB(200, 0, 0, 0),
+              color: Color.fromARGB(150, 0, 0, 0),
             ),
           ),
           Positioned(
@@ -247,19 +253,38 @@ class MusicController extends GetxController {
               margin: const EdgeInsets.only(top: 15),
               width: 47.0,
               height: 47.0,
-              child: const CircularProgressIndicator(),
+              child: const CircularProgressIndicator(
+                color: Colors.blue,
+              ),
             ),
           ),
         ],
       );
     } else if (isPlaying() == true) {
-      return IconButton(
-        iconSize: 60,
-        onPressed: () => pause(),
-        icon: const Icon(
-          CupertinoIcons.pause_circle,
-          color: Color.fromARGB(200, 0, 0, 0),
-        ),
+      return Stack(
+        children: [
+          Positioned(
+            left: 14,
+            top: -1,
+            child: Container(
+              margin: const EdgeInsets.only(top: 15),
+              width: 47.0,
+              height: 47.0,
+              child: CircularProgressIndicator(
+                color: Colors.blue,
+                value: playProcess(),
+              ),
+            ),
+          ),
+          IconButton(
+            iconSize: 60,
+            onPressed: () => pause(),
+            icon: const Icon(
+              CupertinoIcons.pause_circle,
+              color: Color.fromARGB(120, 0, 0, 0),
+            ),
+          )
+        ],
       );
     } else {
       return IconButton(
