@@ -33,7 +33,8 @@ class MusicController extends GetxController {
   var destBasePath = "".obs;
   var chunk = 5;
   var downloading = false.obs;
-  var downloadingI = 0.obs;
+  var downloadingIndex = 0.obs;
+  var downloadingIndexShow = 1.obs;
   var downloadingMsg = "".obs;
   var cancelToken = CancelToken().obs;
 
@@ -120,6 +121,9 @@ class MusicController extends GetxController {
         m.url = await getDestFilePath(m.url);
         addAudioSource(m);
         list[i] = m;
+
+        downloadingIndex(i);
+        downloadingIndexShow(i + 1);
         continue;
       }
 
@@ -130,7 +134,8 @@ class MusicController extends GetxController {
       if (findI) continue;
 
       findI = true;
-      downloadingI(i);
+      downloadingIndex(i);
+      downloadingIndexShow(i + 1);
       log("i ... $i");
     }
   }
@@ -320,15 +325,17 @@ class MusicController extends GetxController {
   void startDownload({int i = 0, bool restart = false}) async {
     checkPermission().then((value) {
       if (value) {
-        if (i >= list.length - 1) {
-          downloadingI(0);
+        if (i >= list.length) {
+          downloadingIndex(0);
+          downloadingIndexShow(list.length);
           downloading(false);
           downloadingMsg("");
           return;
         }
 
         cancelToken(CancelToken());
-        downloadingI(i);
+        downloadingIndex(i);
+        downloadingIndexShow(i + 1);
         downloading(true);
 
         // 创建目录

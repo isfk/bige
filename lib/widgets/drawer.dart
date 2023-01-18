@@ -67,9 +67,9 @@ class _DrawerWidgetState extends State<DrawerWidget>
                     height: 220,
                     child: CircularProgressIndicator(
                       strokeWidth: 1,
-                      value: c.downloadingI / c.list.length,
+                      value: c.downloadingIndexShow / c.list.length,
                       semanticsLabel:
-                          '下载总进度 ${c.downloadingI} / ${c.list.length}',
+                          '下载总进度 ${c.downloadingIndexShow} / ${c.list.length}',
                       valueColor: const AlwaysStoppedAnimation<Color>(
                         Color.fromARGB(160, 0, 0, 0),
                       ),
@@ -80,7 +80,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
                     left: 0,
                     right: 0,
                     top: 60,
-                    child: Text("${c.downloadingI}/${c.list.length}",
+                    child: Text("${c.downloadingIndexShow}/${c.list.length}",
                         textAlign: TextAlign.center),
                   ),
                   Positioned(
@@ -98,7 +98,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
                               c.pauseDownload();
                             }
                           : () {
-                              c.startDownload(i: c.downloadingI());
+                              c.startDownload(i: c.downloadingIndex());
                             },
                       child: Text(
                         c.downloading.value ? "停止下载" : "开始下载",
