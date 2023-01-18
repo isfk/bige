@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:player/common/utils.dart';
 import 'package:player/data.dart';
 import 'package:player/models/music.dart';
 
@@ -20,6 +21,9 @@ class MusicController extends GetxController {
   RxInt playIndex = 0.obs;
   final isPlaying = false.obs;
   final isLoading = false.obs;
+
+  Rx<String> loopMode = "all".obs;
+  Rx<bool> shuffleMode = false.obs;
 
   Rx<AudioPlayer> audioPlayer = AudioPlayer().obs;
   Rx<Duration> playPosition = const Duration().obs;
@@ -52,12 +56,13 @@ class MusicController extends GetxController {
       );
     }
 
+    audioPlayer().setLoopMode(LoopMode.all);
+    audioPlayer().setShuffleModeEnabled(false);
     audioPlayer().setAudioSource(
       ConcatenatingAudioSource(children: mediaList),
       initialIndex: 0,
       initialPosition: Duration.zero,
     );
-
     audioPlayer().playerStateStream.listen((state) {
       if (state.playing) {
         isPlaying(true);
@@ -85,7 +90,9 @@ class MusicController extends GetxController {
     audioPlayer().currentIndexStream.listen((index) {
       if (index != null) {
         playIndex(index);
-        playMusic(list[index]);
+        var temp = list[index];
+        temp.cover = getCoverPng(temp.artist);
+        playMusic(temp);
       }
     });
     audioPlayer().positionStream.listen((position) {
@@ -124,10 +131,30 @@ class MusicController extends GetxController {
     await audioPlayer().setShuffleModeEnabled(true);
   }
 
+  void switchShuffleMode() async {
+    if (shuffleMode.value == false) {
+      shuffleMode(true);
+      await audioPlayer().setShuffleModeEnabled(true);
+    } else {
+      shuffleMode(false);
+      await audioPlayer().setShuffleModeEnabled(false);
+    }
+  }
+
   void seek(int index) async {
     await audioPlayer().seek(Duration.zero, index: index);
     if (isPlaying()) return;
     await audioPlayer().play();
+  }
+
+  void switchLoopMode() async {
+    if (loopMode() == "one") {
+      loopMode("all");
+      await audioPlayer().setLoopMode(LoopMode.all);
+    } else {
+      loopMode("one");
+      await audioPlayer().setLoopMode(LoopMode.one);
+    }
   }
 
   getControlPlayPause() {
@@ -181,10 +208,14 @@ class MusicController extends GetxController {
       children: [
         IconButton(
           iconSize: 30,
-          onPressed: () => shuffle(),
-          icon: const Icon(
-            CupertinoIcons.shuffle,
-            color: Color.fromARGB(200, 0, 0, 0),
+          onPressed: () => switchShuffleMode(),
+          icon: Icon(
+            shuffleMode.value == false
+                ? CupertinoIcons.shuffle
+                : CupertinoIcons.shuffle,
+            color: shuffleMode.value == false
+                ? const Color.fromARGB(80, 0, 0, 0)
+                : const Color.fromARGB(200, 0, 0, 0),
           ),
         ),
         IconButton(
@@ -206,10 +237,14 @@ class MusicController extends GetxController {
         ),
         IconButton(
           iconSize: 30,
-          onPressed: () {},
-          icon: const Icon(
-            CupertinoIcons.music_note_list,
-            color: Color.fromARGB(200, 0, 0, 0),
+          onPressed: () => switchLoopMode(),
+          icon: Obx(
+            () => Icon(
+              loopMode.value == "one"
+                  ? CupertinoIcons.repeat_1
+                  : CupertinoIcons.repeat,
+              color: const Color.fromARGB(200, 0, 0, 0),
+            ),
           ),
         ),
       ],

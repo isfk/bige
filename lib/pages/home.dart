@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
@@ -16,7 +14,7 @@ class HomePage extends StatelessWidget {
     final MusicController c = Get.put(MusicController());
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 187, 187, 187),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: PreferredSize(
         preferredSize: const Size(double.maxFinite, 56),
         child: GestureDetector(
@@ -44,7 +42,7 @@ class HomePage extends StatelessWidget {
             ),
           ),
           onDoubleTap: () {
-            controller.animateTo(0,
+            controller.animateTo(c.playIndex() * 80,
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.ease);
           },
@@ -53,7 +51,7 @@ class HomePage extends StatelessWidget {
       body: Obx(
         () => Stack(children: [
           ListView.builder(
-            padding: const EdgeInsets.only(bottom: 120),
+            padding: const EdgeInsets.only(bottom: 100),
             controller: controller,
             itemCount: c.list.length,
             itemBuilder: (context, index) {
