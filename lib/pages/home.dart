@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
@@ -58,6 +60,10 @@ class HomePage extends StatelessWidget {
               return GestureDetector(
                 child: MusicItem(music: c.list[index]),
                 onTap: () {
+                  if (c.playIndex.value != index) {
+                    c.seek(index);
+                    return;
+                  }
                   if (c.isPlaying.value) {
                     c.pause();
                     return;

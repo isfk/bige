@@ -22,7 +22,7 @@ class MusicController extends GetxController {
   final isLoading = false.obs;
 
   Rx<AudioPlayer> audioPlayer = AudioPlayer().obs;
-  Duration playProcess = const Duration();
+  Rx<Duration> playPosition = const Duration().obs;
   Duration totalProcess = const Duration();
 
   List<AudioSource> mediaList = [];
@@ -66,43 +66,40 @@ class MusicController extends GetxController {
       }
       switch (state.processingState) {
         case ProcessingState.idle:
-          log("idle");
           isLoading(false);
           break;
         case ProcessingState.loading:
-          log("loading");
           isLoading(true);
           break;
         case ProcessingState.buffering:
-          log("buffering");
           isLoading(true);
           break;
         case ProcessingState.ready:
-          log("ready");
           isLoading(false);
           break;
         case ProcessingState.completed:
-          log("completed");
           isLoading(false);
           next();
       }
     });
     audioPlayer().currentIndexStream.listen((index) {
-      log("currentIndexStream: $index");
-      playMusic(list[int.parse(index.toString())]);
+      if (index != null) {
+        playIndex(index);
+        playMusic(list[index]);
+      }
     });
     audioPlayer().positionStream.listen((position) {
-      // log("positionStream: $position");
+      playPosition(position);
     });
-    audioPlayer().durationStream.listen((duration) {
-      // log("durationStream: $duration");
-    });
+    audioPlayer().durationStream.listen((duration) {});
     audioPlayer().shuffleModeEnabledStream.listen((shuffle) {
       log("shuffleModeEnabledStream: $shuffle");
     });
   }
 
   void play() async {
+    await audioPlayer().seek(playPosition());
+    if (isPlaying()) return;
     await audioPlayer().play();
   }
 
@@ -125,6 +122,12 @@ class MusicController extends GetxController {
   void shuffle() async {
     await audioPlayer().shuffle();
     await audioPlayer().setShuffleModeEnabled(true);
+  }
+
+  void seek(int index) async {
+    await audioPlayer().seek(Duration.zero, index: index);
+    if (isPlaying()) return;
+    await audioPlayer().play();
   }
 
   getControlPlayPause() {
