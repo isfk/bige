@@ -1,6 +1,7 @@
-import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,9 +15,6 @@ class MusicController extends GetxController {
   double musicItemHeight = 70;
 
   List<Music> list = <Music>[].obs;
-  Rx<ConcatenatingAudioSource> playlist =
-      ConcatenatingAudioSource(children: []).obs;
-
   Rx<Music> playMusic = Music().obs;
   RxInt playIndex = 0.obs;
   final isPlaying = false.obs;
@@ -31,31 +29,33 @@ class MusicController extends GetxController {
 
   List<AudioSource> mediaList = [];
 
+  // 下载相关
+  var destBasePath = "".obs;
+  var chunk = 5;
+  var downloading = false.obs;
+  var downloadingI = 0.obs;
+  var downloadingMsg = "".obs;
+  var cancelToken = CancelToken().obs;
+
+  List<int> chunkCountAll = [0, 0, 0, 0, 0];
+
   @override
-  void onInit() {
+  Future<void> onInit() async {
     super.onInit();
-    // 生成列表
-    for (var element in jsonDecode(getJsonData())) {
-      var item = Music.fromJson(element);
+    // 列表
+    list = getMusics();
 
-      list.add(item);
+    // 播放列表
+    var futures = <Future>[];
 
-      mediaList.add(
-        AudioSource.uri(
-          Uri.parse(item.url),
-          tag: MediaItem(
-            id: item.url,
-            title: item.name,
-            album: item.artist,
-            displayTitle: item.name,
-            displaySubtitle: item.artist,
-            displayDescription: "我们不能失去信仰",
-            artUri: Uri.parse(item.cover),
-          ),
-        ),
-      );
-    }
+    futures.add(checkMusics());
+    await Future.wait(futures);
+    // 下载路径
+    getMusicPath(type: 1).then((value) {
+      destBasePath(value);
+    });
 
+    // 播放器设置
     audioPlayer().setLoopMode(LoopMode.all);
     audioPlayer().setShuffleModeEnabled(shuffleMode());
     audioPlayer().setAudioSource(
@@ -63,6 +63,8 @@ class MusicController extends GetxController {
       initialIndex: 0,
       initialPosition: Duration.zero,
     );
+
+    // 播放器监听
     audioPlayer().playerStateStream.listen((state) {
       if (state.playing) {
         isPlaying(true);
@@ -71,18 +73,23 @@ class MusicController extends GetxController {
       }
       switch (state.processingState) {
         case ProcessingState.idle:
+          log("idle");
           isLoading(false);
           break;
         case ProcessingState.loading:
+          log("loading");
           isLoading(true);
           break;
         case ProcessingState.buffering:
+          log("buffering");
           isLoading(true);
           break;
         case ProcessingState.ready:
+          log("ready");
           isLoading(false);
           break;
         case ProcessingState.completed:
+          log("completed");
           isLoading(false);
           next();
       }
@@ -91,6 +98,7 @@ class MusicController extends GetxController {
       if (index != null) {
         playIndex(index);
         var temp = list[index];
+        log(temp.url);
         temp.cover = getCoverPng(temp.artist);
         playMusic(temp);
       }
@@ -102,6 +110,64 @@ class MusicController extends GetxController {
     audioPlayer().shuffleModeEnabledStream.listen((shuffle) {
       log("shuffleModeEnabledStream: $shuffle");
     });
+  }
+
+  Future<void> checkMusics() async {
+    var findI = false;
+    for (var i = 0; i < list.length; i++) {
+      var m = list[i];
+      if (await isMusicExists(m.url)) {
+        m.url = await getDestFilePath(m.url);
+        addAudioSource(m);
+        list[i] = m;
+        continue;
+      }
+
+      m.download = "未下载";
+      addAudioSource(m);
+      list[i] = m;
+
+      if (findI) continue;
+
+      findI = true;
+      downloadingI(i);
+      log("i ... $i");
+    }
+  }
+
+  void addAudioSource(Music music) {
+    if (music.url.contains("https://")) {
+      log(music.url);
+      mediaList.add(
+        AudioSource.uri(
+          Uri.parse(music.url),
+          tag: MediaItem(
+            id: music.url,
+            title: music.name,
+            album: music.artist,
+            displayTitle: music.name,
+            displaySubtitle: music.artist,
+            displayDescription: "我们不能失去信仰",
+            artUri: Uri.parse(music.cover),
+          ),
+        ),
+      );
+    } else {
+      mediaList.add(
+        AudioSource.uri(
+          Uri.file(music.url),
+          tag: MediaItem(
+            id: music.url,
+            title: music.name,
+            album: music.artist,
+            displayTitle: music.name,
+            displaySubtitle: music.artist,
+            displayDescription: "我们不能失去信仰",
+            artUri: Uri.parse(music.cover),
+          ),
+        ),
+      );
+    }
   }
 
   void play() async {
@@ -248,6 +314,148 @@ class MusicController extends GetxController {
           ),
         ),
       ],
+    );
+  }
+
+  void startDownload({int i = 0, bool restart = false}) async {
+    checkPermission().then((value) {
+      if (value) {
+        if (i >= list.length - 1) {
+          downloadingI(0);
+          downloading(false);
+          downloadingMsg("");
+          return;
+        }
+
+        cancelToken(CancelToken());
+        downloadingI(i);
+        downloading(true);
+
+        // 创建目录
+        var saveDir = Directory(destBasePath());
+        if (!saveDir.existsSync()) {
+          saveDir.createSync();
+        }
+
+        Future.delayed(Duration.zero, () {}).then((value) async {
+          var music = list[i];
+
+          if (music.download.isEmpty) {
+            // 跳过，继续下载
+            startDownload(i: ++i);
+            return;
+          }
+          log("${music.name} 开始下载");
+
+          var saveDestPath = await getDestPath(music.artist);
+          var saveDestFilePath = await getDestFilePath(music.url);
+          var saveTempPath = await getTempPath(music.artist);
+          var saveTempFilePath = await getTempFilePath(music.url);
+          // log("saveDestPath ... $saveDestPath");
+          // log("saveDestFilePath ... $saveDestFilePath");
+          // log("saveTempPath ... $saveTempPath");
+          // log("saveTempFilePath ... $saveTempFilePath");
+          // 创建目录
+          try {
+            var saveDestDir = Directory(saveDestPath);
+            if (!saveDestDir.existsSync()) {
+              saveDestDir.createSync();
+            }
+
+            var saveTempDir = Directory(saveTempPath);
+            if (!saveTempDir.existsSync()) {
+              saveTempDir.createSync();
+            }
+          } catch (e) {
+            log(e.toString());
+          }
+
+          // 开始下载
+          try {
+            var total = 0;
+            var start = 0;
+            var end = 0;
+
+            downloadingMsg("分析中: ${music.name}");
+
+            // 探测文件大小
+            total = await getRangeTotal(music.url);
+            if (total == 0) return;
+            var chunkSize = (total / chunk).ceil();
+            end += chunkSize;
+            var futures = <Future>[];
+            for (var j = 0; j < chunk; j++) {
+              if (end > total) end = total;
+              var temp = "${saveTempFilePath}_$j";
+              var f = File(temp);
+              if (f.existsSync() && (f.lengthSync() == chunkSize + 1)) {
+                // 存在 大小相同
+                chunkCountAll[j] = f.lengthSync();
+              } else {
+                // 下载 或 重新下载 chunk
+                futures
+                    .add(downloadChunk(i, j, music, temp, start, end, total));
+                chunkCountAll[j] = 0;
+              }
+
+              start += chunkSize;
+              end += chunkSize;
+            }
+
+            await Future.wait(futures);
+
+            // 合并 块
+            mergeChunk(chunk, saveTempFilePath, saveDestFilePath);
+
+            music.download = "";
+            list[i] = music;
+
+            startDownload(i: ++i);
+          } catch (e) {
+            log(e.toString());
+          }
+        });
+      } else {}
+    });
+  }
+
+  void pauseDownload() async {
+    cancelToken().cancel("您取消了下载");
+    // showToast(context, "当前歌曲下载完停止", duration: 10);
+    downloading(false);
+    downloadingMsg("逼歌");
+  }
+
+  Future downloadChunk(int i, int j, Music music, String tempFile, int start,
+      int end, int fileTotal) async {
+    return Dio().download(
+      music.url,
+      tempFile,
+      options: Options(
+        responseType: ResponseType.stream,
+        followRedirects: false,
+        headers: {
+          "range": "bytes=$start-$end",
+        },
+      ),
+      cancelToken: cancelToken(),
+      onReceiveProgress: (count, total) {
+        if (total == -1) {
+          return;
+        }
+
+        chunkCountAll[j] = count;
+
+        // 计算进度
+        var tt = 0;
+        for (var c in chunkCountAll) {
+          tt += c;
+        }
+        var msg = '${(tt / fileTotal * 100).toStringAsFixed(2)}%';
+        music.download = msg;
+        list[i] = music;
+        downloadingMsg("下载中: ${music.name} $msg");
+      },
     );
   }
 }

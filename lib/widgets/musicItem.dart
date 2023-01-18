@@ -61,15 +61,15 @@ class _MusicItemState extends State<MusicItem> {
                   ),
                 ],
               ),
-              const Positioned(
+              Positioned(
                 right: 0,
-                bottom: 0,
+                bottom: 3,
                 child: Text(
-                  "",
-                  style: TextStyle(
-                    fontSize: 14,
+                  widget.music.download,
+                  style: const TextStyle(
+                    fontSize: 12,
                     fontStyle: FontStyle.italic,
-                    // color: Color.fromARGB(80, 255, 255, 255),
+                    color: Color.fromARGB(255, 120, 120, 120),
                   ),
                 ),
               )

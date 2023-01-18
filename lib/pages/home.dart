@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get/instance_manager.dart';
 import 'package:player/controllers/musicController.dart';
+import 'package:player/widgets/drawer.dart';
 import 'package:player/widgets/musicItem.dart';
 
 class HomePage extends StatelessWidget {
@@ -15,14 +16,23 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      drawer: const DrawerWidget(),
+      drawerScrimColor: const Color.fromARGB(100, 0, 0, 0),
       appBar: PreferredSize(
         preferredSize: const Size(double.maxFinite, 56),
         child: GestureDetector(
           child: AppBar(
+            leading: Builder(builder: (context) {
+              return IconButton(
+                onPressed: () => {Scaffold.of(context).openDrawer()},
+                icon: const Icon(Icons.menu, color: Colors.black),
+              );
+            }),
+            centerTitle: true,
             title: const AutoSizeText(
               "我们不能失去信仰",
               style: TextStyle(
-                  fontSize: 28,
+                  fontSize: 16,
                   color: Color.fromARGB(200, 0, 0, 0),
                   fontStyle: FontStyle.italic),
               minFontSize: 14,
