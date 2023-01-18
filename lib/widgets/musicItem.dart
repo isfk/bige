@@ -29,7 +29,7 @@ class _MusicItemState extends State<MusicItem> {
             fit: BoxFit.contain,
             alignment: Alignment.topLeft,
           ),
-          color: const Color.fromARGB(40, 200, 200, 200),
+          color: const Color.fromARGB(100, 200, 200, 200),
           borderRadius: const BorderRadius.all(Radius.circular(5)),
         ),
         padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
