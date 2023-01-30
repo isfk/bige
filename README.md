@@ -2,13 +2,9 @@
 
 - B 哥/逼哥/南京李志 歌曲下载
 - 歌单、专辑封面已进行本地化，歌曲资源从网络下载
-- 下载采用分块下载，支持断点续传
+- 下载采用分块下载，支持断点续传，下载之后可本地播放
 
-## icon 生成
-
-```
-flutter pub run icons_launcher:create
-```
+![logos](https://user-images.githubusercontent.com/70327450/215376089-710c2b99-a605-437d-b87a-1c578c31aac3.jpg)
 
 ## 说明
 
