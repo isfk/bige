@@ -32,14 +32,15 @@ class HomePage extends StatelessWidget {
             title: const AutoSizeText(
               "我们不能失去信仰",
               style: TextStyle(
-                  fontSize: 16,
-                  color: Color.fromARGB(200, 0, 0, 0),
-                  fontStyle: FontStyle.italic),
+                fontSize: 16,
+                color: Color.fromARGB(200, 0, 0, 0),
+                fontStyle: FontStyle.italic,
+              ),
               minFontSize: 14,
               maxLines: 1,
             ),
             backgroundColor: Colors.white,
-            elevation: 0,
+            // elevation: 0,
             flexibleSpace: Container(
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -59,7 +60,7 @@ class HomePage extends StatelessWidget {
             ),
           ),
           onDoubleTap: () {
-            controller.animateTo(c.playIndex() * 70,
+            controller.animateTo(c.playIndex() * c.musicItemHeight,
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.ease);
           },
@@ -94,7 +95,7 @@ class HomePage extends StatelessWidget {
               left: 0,
               right: 0,
               child: Container(
-                height: 110,
+                height: 120,
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Color.fromARGB(255, 255, 255, 255),
