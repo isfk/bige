@@ -29,12 +29,12 @@ class _MusicItemState extends State<MusicItem> {
             fit: BoxFit.contain,
             alignment: Alignment.topLeft,
           ),
-          color: const Color.fromARGB(100, 200, 200, 200),
+          color: const Color.fromARGB(100, 220, 220, 220),
           borderRadius: const BorderRadius.all(Radius.circular(5)),
         ),
         padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
         child: Padding(
-          padding: const EdgeInsets.only(left: 60),
+          padding: const EdgeInsets.only(left: 70),
           child: Stack(
             children: [
               Column(
@@ -45,7 +45,7 @@ class _MusicItemState extends State<MusicItem> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
-                      // color: Color.fromARGB(160, 255, 255, 255),
+                      color: Color.fromARGB(255, 80, 80, 80),
                     ),
                     minFontSize: 14,
                     maxLines: 1,
@@ -56,7 +56,7 @@ class _MusicItemState extends State<MusicItem> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontStyle: FontStyle.italic,
-                      // color: Color.fromARGB(80, 255, 255, 255),
+                      color: Color.fromARGB(255, 160, 160, 160),
                     ),
                   ),
                 ],
@@ -69,7 +69,7 @@ class _MusicItemState extends State<MusicItem> {
                   style: const TextStyle(
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
-                    color: Color.fromARGB(255, 120, 120, 120),
+                    color: Color.fromARGB(255, 200, 200, 200),
                   ),
                 ),
               )

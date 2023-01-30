@@ -12,7 +12,7 @@ import 'package:player/data.dart';
 import 'package:player/models/music.dart';
 
 class MusicController extends GetxController {
-  double musicItemHeight = 70;
+  double musicItemHeight = 80;
 
   List<Music> list = <Music>[].obs;
   Rx<Music> playMusic = Music().obs;
@@ -121,19 +121,19 @@ class MusicController extends GetxController {
 
   Future<void> checkMusics() async {
     var findI = false;
+    var ok = await checkPermission();
     for (var i = 0; i < list.length; i++) {
       var m = list[i];
-      if (await isMusicExists(m.url)) {
-        m.url = await getDestFilePath(m.url);
-        addAudioSource(m);
-        list[i] = m;
-
-        downloadingIndex(i);
-        downloadingIndexShow(i + 1);
-        continue;
+      if (ok) {
+        if (await isMusicExists(m.url)) {
+          m.url = await getDestFilePath(m.url);
+          addAudioSource(m);
+          list[i] = m;
+          continue;
+        }
       }
 
-      m.download = "未下载";
+      m.download = "在线播放";
       addAudioSource(m);
       list[i] = m;
 

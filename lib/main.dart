@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
       title: '播放器',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        useMaterial3: true,
       ),
       home: const HomePage(),
     );

@@ -13,9 +13,6 @@ class _DrawerWidgetState extends State<DrawerWidget>
     with AutomaticKeepAliveClientMixin {
   final MusicController c = Get.put(MusicController());
   @override
-  void initState() {
-    super.initState();
-  }
 
   // _showAbout() async {
   //   showLicensePage(
@@ -37,24 +34,35 @@ class _DrawerWidgetState extends State<DrawerWidget>
 
     return Obx(
       () => Drawer(
-        width: double.infinity / 2,
         backgroundColor: Colors.white,
         child: MediaQuery.removePadding(
           context: context,
           removeTop: true,
           child: Column(
             children: [
-              const DrawerHeader(
+              DrawerHeader(
                 padding: EdgeInsets.zero,
-                child: Center(
-                  child: Text(
-                    "逼歌",
-                    style: TextStyle(
-                      color: Color.fromARGB(255, 0, 0, 0),
-                      fontSize: 36,
-                      fontWeight: FontWeight.w200,
+                child: Column(
+                  children: const [
+                    SizedBox(
+                      height: 64,
                     ),
-                  ),
+                    Text(
+                      "逼歌",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                        fontSize: 36,
+                        fontWeight: FontWeight.w200,
+                      ),
+                    ),
+                    Text(
+                      "v0.6.0",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 200, 200, 200),
+                        fontSize: 14,
+                      ),
+                    )
+                  ],
                 ),
               ),
               const SizedBox(
@@ -90,8 +98,8 @@ class _DrawerWidgetState extends State<DrawerWidget>
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         fixedSize: const Size(120, 50),
-                        backgroundColor: Colors.black,
-                        shadowColor: Colors.red,
+                        backgroundColor:
+                            c.downloading.value ? Colors.grey : Colors.black,
                       ),
                       onPressed: c.downloading.value
                           ? () {
